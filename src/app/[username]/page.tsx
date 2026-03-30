@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ProfileHeader } from "@/components/public-page/ProfileHeader";
 import { WidgetRenderer } from "@/components/public-page/WidgetRenderer";
+import { ThemeProvider } from "@/components/public-page/ThemeProvider";
 import type { Metadata } from "next";
 
 interface PageProps {
@@ -35,7 +36,6 @@ export default async function PublicPage({ params }: PageProps) {
   const { username } = await params;
   const supabase = createAdminClient();
 
-  // Get profile by slug
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -44,7 +44,6 @@ export default async function PublicPage({ params }: PageProps) {
 
   if (!profile) notFound();
 
-  // Get page config
   const { data: page } = await supabase
     .from("pages")
     .select("*")
@@ -53,46 +52,58 @@ export default async function PublicPage({ params }: PageProps) {
 
   if (!page?.is_published) notFound();
 
-  // Get integrations for widget data
   const { data: integrations } = await supabase
     .from("integrations")
     .select("platform, cached_data, is_active")
     .eq("user_id", profile.id)
     .eq("is_active", true);
 
-  // Build widgets from layout config, falling back to all integrations
   const layout = (page.layout as Array<{ type: string }>) ?? [];
-  const widgets = layout.length > 0
-    ? layout
+  const layoutMode = (page.layout_mode as "single" | "grid") ?? "single";
+  const themeId = (page.theme as string) ?? "default";
+
+  const layoutItems = layout as Array<{ type: string; label?: string; itemType?: string }>;
+
+  const widgets = layoutItems.length > 0
+    ? layoutItems
         .map((item) => {
+          // Pass header items through directly
+          if (item.itemType === "header" || item.type === "header") {
+            return {
+              type: "header",
+              data: { label: item.label ?? "" } as Record<string, unknown>,
+            };
+          }
           const integration = integrations?.find(
             (i) => i.platform === item.type
           );
           if (!integration) return null;
           return {
-            type: integration.platform as "youtube" | "twitter" | "twitch",
+            type: integration.platform,
             data: (integration.cached_data ?? {}) as Record<string, unknown>,
           };
         })
-        .filter(Boolean) as Array<{ type: "youtube" | "twitter" | "twitch"; data: Record<string, unknown> }>
+        .filter(Boolean) as Array<{ type: string; data: Record<string, unknown> }>
     : (integrations ?? []).map((i) => ({
-        type: i.platform as "youtube" | "twitter" | "twitch",
+        type: i.platform,
         data: (i.cached_data ?? {}) as Record<string, unknown>,
       }));
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <ProfileHeader
-        displayName={profile.display_name}
-        bio={profile.bio}
-        avatarUrl={profile.avatar_url}
-      />
-      <div className="mt-8">
-        <WidgetRenderer widgets={widgets} />
-      </div>
-      <footer className="mt-12 text-center text-sm text-gray-400">
-        Powered by OnePager
-      </footer>
-    </main>
+    <ThemeProvider themeId={themeId}>
+      <main className="mx-auto max-w-2xl px-4 py-12">
+        <ProfileHeader
+          displayName={profile.display_name}
+          bio={profile.bio}
+          avatarUrl={profile.avatar_url}
+        />
+        <div className="mt-8">
+          <WidgetRenderer widgets={widgets} layoutMode={layoutMode} />
+        </div>
+        <footer className="mt-12 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+          Powered by OnePager
+        </footer>
+      </main>
+    </ThemeProvider>
   );
 }

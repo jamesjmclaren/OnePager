@@ -31,7 +31,9 @@ export default async function DashboardPage() {
             <CardDescription>Connected platforms</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{integrationCount ?? 0}/3</p>
+            <p className="text-3xl font-bold">
+              {integrationCount ?? 0}/{profile?.plan === "pro" ? "\u221e" : "3"}
+            </p>
           </CardContent>
         </Card>
 

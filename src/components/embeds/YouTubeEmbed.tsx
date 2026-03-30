@@ -18,7 +18,7 @@ export function YouTubeEmbed({ videoId, title }: YouTubeEmbedProps) {
         />
       </div>
       {title && (
-        <p className="mt-2 text-sm font-medium text-gray-800">{title}</p>
+        <p className="mt-2 text-sm font-medium" style={{ color: "var(--text-primary)" }}>{title}</p>
       )}
     </div>
   );
