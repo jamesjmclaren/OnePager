@@ -11,12 +11,28 @@ export function ProfileHeader({ displayName, bio, avatarUrl }: ProfileHeaderProp
     <div className="flex flex-col items-center text-center">
       <Avatar className="h-20 w-20">
         <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
-        <AvatarFallback className="text-2xl">
+        <AvatarFallback
+          className="text-2xl"
+          style={{
+            backgroundColor: "var(--card-bg)",
+            color: "var(--text-primary)",
+            borderColor: "var(--card-border)",
+          }}
+        >
           {displayName.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
-      <h1 className="mt-4 text-2xl font-bold">{displayName}</h1>
-      {bio && <p className="mt-1 text-gray-600">{bio}</p>}
+      <h1
+        className="mt-4 text-2xl font-bold"
+        style={{ color: "var(--text-primary)" }}
+      >
+        {displayName}
+      </h1>
+      {bio && (
+        <p className="mt-1" style={{ color: "var(--text-secondary)" }}>
+          {bio}
+        </p>
+      )}
     </div>
   );
 }

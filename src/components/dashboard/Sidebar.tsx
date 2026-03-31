@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Puzzle, FileEdit, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Puzzle, FileEdit, Settings, LogOut, Crown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -17,6 +18,22 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [plan, setPlan] = useState<string>("free");
+
+  useEffect(() => {
+    const loadPlan = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan")
+        .eq("id", user.id)
+        .single();
+      setPlan(profile?.plan ?? "free");
+    };
+    loadPlan();
+  }, []);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -54,7 +71,24 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="border-t p-4">
+      <div className="border-t p-4 space-y-2">
+        {plan === "pro" ? (
+          <Link
+            href="/dashboard/upgrade"
+            className="flex w-full items-center gap-3 rounded-lg bg-yellow-50 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-100"
+          >
+            <Crown className="h-5 w-5 text-yellow-500" />
+            Pro Plan
+          </Link>
+        ) : (
+          <Link
+            href="/dashboard/upgrade"
+            className="flex w-full items-center gap-3 rounded-lg bg-gradient-to-r from-yellow-50 to-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:from-yellow-100 hover:to-orange-100"
+          >
+            <Crown className="h-5 w-5 text-orange-500" />
+            Upgrade to Pro
+          </Link>
+        )}
         <button
           onClick={handleSignOut}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"

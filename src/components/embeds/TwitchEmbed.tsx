@@ -17,12 +17,15 @@ export function TwitchEmbed({
 }: TwitchEmbedProps) {
   if (!isLive) {
     return (
-      <div className="rounded-xl border bg-gray-900 p-6 text-white">
+      <div
+        className="rounded-xl border p-6"
+        style={{ backgroundColor: "var(--card-bg)", borderColor: "var(--card-border)", color: "var(--text-primary)" }}
+      >
         <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-gray-500" />
+          <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "var(--text-muted)" }} />
           <span className="font-medium">{channelName}</span>
         </div>
-        <p className="mt-2 text-sm text-gray-400">Currently offline</p>
+        <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>Currently offline</p>
       </div>
     );
   }
@@ -36,12 +39,15 @@ export function TwitchEmbed({
           allowFullScreen
         />
       </div>
-      <div className="rounded-b-xl bg-gray-900 p-3 text-white">
+      <div
+        className="rounded-b-xl p-3"
+        style={{ backgroundColor: "var(--card-bg)", color: "var(--text-primary)" }}
+      >
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-red-500" />
           <span className="text-sm font-medium">LIVE</span>
           {viewerCount !== undefined && (
-            <span className="text-sm text-gray-400">
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
               {viewerCount.toLocaleString()} viewers
             </span>
           )}
@@ -50,7 +56,7 @@ export function TwitchEmbed({
           <p className="mt-1 text-sm">{streamTitle}</p>
         )}
         {gameName && (
-          <p className="text-xs text-gray-400">{gameName}</p>
+          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{gameName}</p>
         )}
       </div>
     </div>
